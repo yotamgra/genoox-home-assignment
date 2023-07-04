@@ -1,8 +1,10 @@
 const axios = require('axios');
 const fs = require('fs');
+const gunzip = require('gunzip-file');
 
-const url = 'https://resources.genoox.com/homeAssingment/demo_vcf_multisample.vcf.gz';
-const outputFile = 'output.vcf.gz';
+const url = 'https://s3.amazonaws.com/resources.genoox.com/homeAssingment/demo_vcf_multisample.vcf.gz';
+const gzippedFile = 'output.vcf.gz';
+const outputFile = 'output.vcf';
 
 async function downloadFile() {
   try {
@@ -12,7 +14,7 @@ async function downloadFile() {
       responseType: 'stream',
     });
 
-    const fileStream = fs.createWriteStream(outputFile);
+    const fileStream = fs.createWriteStream(gzippedFile);
     response.data.pipe(fileStream);
 
     return new Promise((resolve, reject) => {
@@ -24,10 +26,14 @@ async function downloadFile() {
   }
 }
 
-downloadFile()
-  .then(() => {
-    console.log('File downloaded successfully.');
-  })
-  .catch((error) => {
+async function convertFileToText() {
+  try {
+    await downloadFile();
+    await gunzip(gzippedFile, outputFile);
+    console.log('File converted to text successfully.');
+  } catch (error) {
     console.error('An error occurred:', error);
-  });
+  }
+}
+
+convertFileToText();
