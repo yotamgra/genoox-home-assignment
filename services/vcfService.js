@@ -2,76 +2,57 @@ const fs = require("fs");
 const { createGunzip } = require("zlib");
 
 async function parseVCFFile(filename, start, end, minDP, limit) {
-  const fileStream = fs.createReadStream(filename);
-  const decompressedFileStream = fileStream.pipe(createGunzip());
+  // Create the three new files: father_filtered.vcf, mother_filtered.vcf, proband_filtered.vcf
+const fileNames = ['father_filtered.vcf', 'mother_filtered.vcf', 'proband_filtered.vcf'];
+fileNames.forEach(fileName => {
+  fs.writeFileSync(fileName, '');
+});
 
-  let headers = [];
-  let samples = [];
+// Read the VCF file
+const vcfData = fs.readFileSync('C:/Users/yotam/genoox-home-assignment/services/output.vcf', 'utf8');
 
-  const sampleRegex = /^#CHROM.*?\tFORMAT\t(.*)$/;
+// Split the file into individual lines
+const lines = vcfData.split('\n');
 
-  for await (const line of decompressedFileStream) {
-    const lineString = line.toString().trim();
+// Initialize an empty array to store the processed data
+const processedData = [];
 
-    if (lineString.startsWith("##")) {
-      // Skip header lines
-      continue;
-    } else if (lineString.startsWith("#")) {
-      // Parse column headers
-      headers = lineString.split("\t");
-      headers[0] = headers[0].substring(1);
-      continue;
-    }
+// Process each line of the VCF file
+lines.forEach(line => {
+  if (line.startsWith('##')) {
+    // Copy the header lines to each new file
+    fileNames.forEach(fileName => {
+      fs.appendFileSync(fileName, line + '\n');
+    });
+  } else if (line.startsWith('#')) {
+    
+    // Process header line starting with "#"
+    const headerFields = line.split('\t');
+    const sampleIndex = headerFields.indexOf('proband'); // Change 'proband' to the relevant sample name ('father', 'mother', etc.)
+    const relevantHeader = ['#' + headerFields.slice(0, 9).join('\t'), headerFields[sampleIndex]].join('\t');
+    console.log("headerFields",headerFields)
+    console.log("sampleIndex",sampleIndex)
+    console.log("relevantHeader",relevantHeader)
+    // Add the relevant header line to the processed data array
+    processedData.push({ fileName: `${headerFields[sampleIndex].toLowerCase()}_filtered.vcf`, lines: [relevantHeader] });
+  } else {
+    // Process data line
+    const sampleData = line.split('\t')[9]; // Assuming sample data is always in the 10th column
+    const relevantLine = ['#' + line.split('\t').slice(0, 9).join('\t'), sampleData].join('\t');
 
-    if (headers.length === 0) {
-      throw new Error("Missing header information.");
-    }
-
-    if (lineString.startsWith("#CHROM")) {
-      // Parse sample names
-      const matches = lineString.match(sampleRegex);
-
-      if (matches && matches[1]) {
-        samples = matches[1].split("\t");
-      }
-
-      continue;
-    }
-
-    const fields = lineString.split("\t");
-
-    const pos = parseInt(fields[1]);
-    const dp = parseInt(getValueFromInfoField(fields[7], "DP"));
-    const gene = await getVariantGene(fields[0], pos);
-
-    if (isValidVariant(pos, dp, gene)) {
-      for (let i = 0; i < samples.length; i++) {
-        const sampleName = samples[i];
-
-        if (!isValidSampleIndex(i)) {
-          break;
-        }
-
-        const outputFile = `${sampleName}_filtered.vcf`;
-        const variantLine = createVariantLine(
-          fields,
-          headers,
-          sampleName,
-          gene
-        );
-
-        fs.appendFileSync(outputFile, variantLine + "\n");
-
-        if (
-          limit &&
-          fs.readFileSync(outputFile, "utf-8").trim().split("\n").length >=
-            limit
-        ) {
-          break;
-        }
-      }
+    // Add the relevant line to the corresponding processed data array
+    const relevantData = processedData.find(data => data.fileName === `${sampleData.toLowerCase()}_filtered.vcf`);
+    if (relevantData) {
+      relevantData.lines.push(relevantLine);
     }
   }
+});
+
+// Write the first 10 lines after the header line to each file
+processedData.forEach(data => {
+  const { fileName, lines } = data;
+  fs.appendFileSync(fileName, lines.slice(0, 11).join('\n'));
+});
 }
 
 module.exports = {
