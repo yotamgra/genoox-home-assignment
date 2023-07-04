@@ -13,7 +13,9 @@ function parseVCFFile(filename) {
       return;
     } else if (line.startsWith('#')) {
       // Parse column headers
-      headers = line.split('\t').slice(9);
+      headers = line.split('\t');
+      headers[0] = headers[0].substring(1);
+      console.log(headers)
       return;
     }
 
