@@ -4,13 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "async-handler": "^0.0.3",
     "axios": "^1.4.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
     "fs": "^0.0.1-security",
-    "gunzip-file": "^0.1.1"
+    "gunzip-file": "^0.1.1",
+    "nodemon": "^2.0.22"
   }
 }

@@ -24,9 +24,6 @@ function parseVCFFile(filename) {
     const pos = parseInt(fields[1]);
     const ref = fields[3];
     const alt = fields[4];
-    if (!fields[7]) {
-      console.log("line", line);
-    }
     const infoItems = fields[7].split(";");
     const info = {};
     infoItems.forEach((item) => {
