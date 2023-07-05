@@ -1,7 +1,5 @@
 import fs from "fs";
-import { createGunzip } from "zlib";
 import axios from "axios";
-import { log } from "console";
 
 export const parseVCFFile = async (filename, start, end, minDP, limit) => {
   // Create the three new files: father_filtered.vcf, mother_filtered.vcf, proband_filtered.vcf
@@ -10,9 +8,11 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
     "src/files/mother_filtered.vcf",
     "src/files/proband_filtered.vcf",
   ];
-  let fatherVarientCount = 0;
-  let motherVarientCount = 0;
-  let probandVarientCount = 0;
+  // Initialize variant count map
+  const countVarientMap = new Map();
+  countVarientMap.set("father", 0);
+  countVarientMap.set("mother", 0);
+  countVarientMap.set("proband", 0);
 
   fileNames.forEach((fileName) => {
     fs.writeFileSync(fileName, "");
@@ -27,9 +27,9 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
   // Process each line of the VCF file
   for (let line of lines) {
     if (
-      fatherVarientCount === limit &&
-      motherVarientCount === limit &&
-      probandVarientCount === limit
+      countVarientMap.get("father") === limit &&
+      countVarientMap.get("mother") === limit &&
+      countVarientMap.get("proband") === limit
     ) {
       break;
     }
@@ -68,27 +68,24 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
       });
       const formatFields = fields[8];
 
-      if (start && pos >= start) {
-        if (end && pos <= end) {
-          if (minDP && info.DP >= minDP) {
+      if (!start || pos >= start) {
+        if (!end || pos <= end) {
+          if (!minDP || info.DP >= minDP) {
             // Process sample data
             const sampleData = [
               {
                 fieldName: "father",
                 sample: fields[9],
-                count: fatherVarientCount,
                 fileIndex: 0,
               },
               {
                 fieldName: "mother",
                 sample: fields[10],
-                count: motherVarientCount,
                 fileIndex: 1,
               },
               {
                 fieldName: "proband",
                 sample: fields[11],
-                count: probandVarientCount,
                 fileIndex: 2,
               },
             ];
@@ -103,7 +100,10 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
                   fileNames[fileIndex],
                   `${chr}\t${pos}\t${id}\t${ref}\t${alt}\t${qual}\t${filter}\t${newInfo}\t${formatFields}\t${sample}\n`
                 );
-                sampleInfo.count++;
+                countVarientMap.set(
+                  fieldName,
+                  countVarientMap.get(fieldName) + 1
+                );
               }
             }
           }
