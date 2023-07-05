@@ -24,6 +24,7 @@ async function parseVCFFile(filename, start, end, minDP, limit) {
 
   // Process each line of the VCF file
   lines.forEach((line) => {
+    
     if (line.startsWith("##")) {
       // Copy the header lines to each new file
       fileNames.forEach((fileName) => {
@@ -42,11 +43,31 @@ async function parseVCFFile(filename, start, end, minDP, limit) {
       });
     } else {
       // Process data line
-      //
-      console.log(line.split("\t"));
-      const sampleData = line.split("\t")[9]; // Assuming sample data is always in the 10th column
-      ///sample data can be in the 9th - father 10th - mother  11th - proband
-      ///
+      console.log("line", line.split("\t"));
+      const fields = line.split("\t");
+      const chrom = fields[0];
+      const pos = parseInt(fields[1]);
+      const ref = fields[3];
+      const alt = fields[4];
+      const infoItems = fields[7].split(";");
+      const info = {};
+      infoItems.forEach((item) => {
+        const [key, value] = item.split("=");
+        info[key] = value;
+      });
+      const formatFields = fields[8].split(":");
+      console.log("fields",fields)
+      console.log("chrom", chrom)
+      console.log("pos", pos)
+      console.log("ref", ref)
+      console.log("alt", alt)
+      console.log("infoItems", infoItems)
+
+      //sample data can be in the 9th - father 10th - mother  11th - proband
+      const sampleFather = line.split("\t")[9];
+      const sampleMother = line.split("\t")[10];
+      const sampleProband = line.split("\t")[11];
+      const relevantLine = `${sampleFather}\t${sampleMother}\t${sampleProband}`;
 
       // Add the relevant line to the corresponding processed data array
       const relevantData = processedData.find(
@@ -57,7 +78,6 @@ async function parseVCFFile(filename, start, end, minDP, limit) {
       }
     }
   });
-  
 
   // Write the first 10 lines after the header line to each file
   processedData.forEach((data) => {

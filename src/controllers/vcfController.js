@@ -9,13 +9,13 @@ const vcfService = require("../services/vcfService");
 // });
 const processVcf = async (req, res) => {
   const { start, end, minDP, limit } = req.body;
-  // await vcfService.parseVCFFile(
-  //   "src/sevices/output.vcf",
-  //   start,
-  //   end,
-  //   minDP,
-  //   limit
-  // );
+  await vcfService.parseVCFFile(
+    "src/sevices/output.vcf",
+    start,
+    end,
+    minDP,
+    limit
+  );
   const rootFolder = "src/files";
 
   const files = [
