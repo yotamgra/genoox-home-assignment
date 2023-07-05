@@ -1,6 +1,7 @@
 import fs from "fs";
 import { createGunzip } from "zlib";
 import axios from "axios";
+import { log } from "console";
 
 export const parseVCFFile = async (filename, start, end, minDP, limit) => {
   // Create the three new files: father_filtered.vcf, mother_filtered.vcf, proband_filtered.vcf
@@ -24,8 +25,7 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
   const lines = vcfData.split("\n");
 
   // Process each line of the VCF file
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i];
+  for (let line of lines) {
     if (
       fatherVarientCount === limit &&
       motherVarientCount === limit &&
@@ -43,9 +43,8 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
       });
     } else if (line.startsWith("#")) {
       // Process line starting with "#"
-      const ColumnKeys =
-        "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT";
-
+      const ColumnKeys = line.split("\t").slice(0, 9).join("\t");
+      
       ///For each file, add the column keys and relevant sample
       fileNames.forEach((fileName) => {
         const sample = fileName.split("_")[0].split("/")[2];
@@ -72,48 +71,38 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
       if (start && pos >= start) {
         if (end && pos <= end) {
           if (minDP && info.DP >= minDP) {
-            //sample data can be in the 9th - father 10th - mother  11th - proband
-            const sampleFather = line.split("\t")[9];
-            const sampleMother = line.split("\t")[10];
-            const sampleProband = line.split("\t")[11];
-            // cut the sample data from the line
-            line = line.split("\t").slice(0, 9).join("\t");
+            // Process sample data
+            const sampleData = [
+              {
+                fieldName: "father",
+                sample: fields[9],
+                count: fatherVarientCount,
+                fileIndex: 0,
+              },
+              {
+                fieldName: "mother",
+                sample: fields[10],
+                count: motherVarientCount,
+                fileIndex: 1,
+              },
+              {
+                fieldName: "proband",
+                sample: fields[11],
+                count: probandVarientCount,
+                fileIndex: 2,
+              },
+            ];
 
-            //check if the sample data contains numbers if so it exists else it doesnt
-            if (sampleFather.match(/\d+/g)) {
-              if (fatherVarientCount < limit) {
-                const gene = await fetchVariantDetails({ chr, pos, ref, alt });
-                //add gene to info field name GENE and add the gene name
-                const newInfo = `${fields[7]};GENE=${gene}`;
-
-                //push the fieldes to the file
-                fs.appendFileSync(
-                  fileNames[0],
-                  `${chr}\t${pos}\t${id}\t${ref}\t${alt}\t${qual}\t${filter}\t${newInfo}\t${formatFields}\t${sampleFather}\n`
-                );
-                fatherVarientCount++;
-              }
-            }
-            if (sampleMother.match(/\d+/g)) {
-              if (motherVarientCount < limit) {
+            for (let sampleInfo of sampleData) {
+              const { fieldName, sample, count, fileIndex } = sampleInfo;
+              if (sample.match(/\d+/g) && count < limit) {
                 const gene = await fetchVariantDetails({ chr, pos, ref, alt });
                 const newInfo = `${fields[7]};GENE=${gene}`;
                 fs.appendFileSync(
-                  fileNames[1],
-                  `${chr}\t${pos}\t${id}\t${ref}\t${alt}\t${qual}\t${filter}\t${newInfo}\t${formatFields}\t${sampleFather}\n`
+                  fileNames[fileIndex],
+                  `${chr}\t${pos}\t${id}\t${ref}\t${alt}\t${qual}\t${filter}\t${newInfo}\t${formatFields}\t${sample}\n`
                 );
-                motherVarientCount++;
-              }
-            }
-            if (sampleProband.match(/\d+/g)) {
-              if (probandVarientCount < limit) {
-                const gene = await fetchVariantDetails({ chr, pos, ref, alt });
-                const newInfo = `${fields[7]};GENE=${gene}`;
-                fs.appendFileSync(
-                  fileNames[2],
-                  `${chr}\t${pos}\t${id}\t${ref}\t${alt}\t${qual}\t${filter}\t${newInfo}\t${formatFields}\t${sampleFather}\n`
-                );
-                probandVarientCount++;
+                sampleInfo.count++;
               }
             }
           }
