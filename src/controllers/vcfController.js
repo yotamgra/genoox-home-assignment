@@ -25,7 +25,7 @@ export const processVcf = asyncHandler(async (req, res) => {
       console.error("Error sending the ZIP file:", err);
     } else {
       console.log("ZIP file sent successfully.");
-      fs.unlinkSync(zipFilePath); // Clean up the temporary ZIP file
+      fs.unlinkSync(`${rootFolder}/${zipFilePath}`); // Clean up the temporary ZIP file
     }
   });
 });
