@@ -22,15 +22,9 @@ export const parseVCFFile = (filename, start, end, minDP, limit) => {
   // Split the file into individual lines
   const lines = vcfData.split("\n");
 
-  // Initialize an empty array to store the processed data
-  ///i dont want this array
-  const processedData = [];
-
   // Process each line of the VCF file
-
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i];
-    //if fatherVarientCount && motherVarientCount && probandVarientCount are all equal to limit then stop the loop
     if (
       fatherVarientCount === limit &&
       motherVarientCount === limit &&
@@ -47,19 +41,17 @@ export const parseVCFFile = (filename, start, end, minDP, limit) => {
         fs.appendFileSync(fileName, line + "\n");
       });
     } else if (line.startsWith("#")) {
-      // Process header line starting with "#"
-
+      // Process line starting with "#"
       const ColumnKeys =
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT";
 
-      ///Add the column keys - tle line wich starts with # with the relevant sample
+      ///For each file, add the column keys and relevant sample
       fileNames.forEach((fileName) => {
         const sample = fileName.split("_")[0].split("/")[2];
         fs.appendFileSync(fileName, `${ColumnKeys}\t${sample}\n`);
       });
     } else {
       // Process data line
-
       const fields = line.split("\t");
       const chrom = fields[0];
       const pos = parseInt(fields[1]);
@@ -72,15 +64,7 @@ export const parseVCFFile = (filename, start, end, minDP, limit) => {
         info[key] = value;
       });
       const formatFields = fields[8].split(":");
-      // console.log("fields", fields);
-      // console.log("chrom", chrom);
-      // console.log("pos", pos);
-      // console.log("ref", ref);
-      // console.log("alt", alt);
-      // console.log("infoItems", infoItems);
 
-      //start,end, minDP are optional
-      //limit is the number of max varients for each file
       if (start && pos >= start) {
         if (end && pos <= end) {
           if (minDP && info.DP >= minDP) {
@@ -90,13 +74,12 @@ export const parseVCFFile = (filename, start, end, minDP, limit) => {
             const sampleProband = line.split("\t")[11];
             // cut the sample data from the line
             line = line.split("\t").slice(0, 9).join("\t");
-            //should be seen something like: 0/1:7,2:0.222:9:63:63,0,288:0,7,2,0 if exsit or something like: ./.:.:.:.:.:.:. if not
-            //so check if the sample contains numbers if so it exists else it doesnt
+
+            //check if the sample data contains numbers if so it exists else it doesnt
             if (sampleFather.match(/\d+/g)) {
               if (fatherVarientCount < limit) {
                 //push the fieldes in index 0-8 and add the sample data in index 9
                 fs.appendFileSync(fileNames[0], `${line}\t${sampleFather}\n`);
-
                 fatherVarientCount++;
               }
             }
@@ -117,8 +100,6 @@ export const parseVCFFile = (filename, start, end, minDP, limit) => {
       }
     }
   }
-  // i want to return a success message
+
   return "success";
 };
-
-
