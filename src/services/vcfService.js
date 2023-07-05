@@ -54,8 +54,9 @@ async function parseVCFFile(filename, start, end, minDP, limit) {
 
       ///Add the column keys - tle line wich starts with # with the relevant sample
       fileNames.forEach((fileName) => {
-        const sample = fileName.split("_")[0];
-        fs.appendFileSync(fileName, `${ColumnKeys}\t${sample}`);
+        
+        const sample = fileName.split("_")[0].split("/")[2];
+        fs.appendFileSync(fileName, `${ColumnKeys}\t${sample}\n`);
       });
     } else {
       // Process data line
