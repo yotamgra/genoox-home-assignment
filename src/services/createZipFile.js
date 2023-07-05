@@ -7,15 +7,15 @@ export const createZipFile = (rootFolder) => {
     `${rootFolder}/mother_filtered.vcf`,
     `${rootFolder}/proband_filtered.vcf`,
   ];
-  const zipFileName = "files.zip";
+  const zipFileName = "filtered_files.zip";
 
   return new Promise((resolve, reject) => {
     // Create a writable stream to store the ZIP file
-    const zipStream = fs.createWriteStream(zipFileName);
+    const zipStream = fs.createWriteStream(`${rootFolder}/${zipFileName}`);
 
     // Create a new ZIP archive
     const archive = archiver("zip", {
-      zlib: { level: 9 }, // Set compression level (optional)
+      zlib: { level: 9 }, // Set compression level 
     });
 
     // Pipe the archive to the zipStream
@@ -38,4 +38,7 @@ export const createZipFile = (rootFolder) => {
     zipStream.on("error", reject);
   });
 };
+
+
+createZipFile("src/files")
 
