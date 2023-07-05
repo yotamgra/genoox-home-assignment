@@ -8,6 +8,10 @@ async function parseVCFFile(filename, start, end, minDP, limit) {
     "src/files/mother_filtered.vcf",
     "src/files/proband_filtered.vcf",
   ];
+  let fatherVarientCount = 0;
+  let motherVarientCount = 0;
+  let probandVarientCount = 0;
+
   fileNames.forEach((fileName) => {
     fs.writeFileSync(fileName, "");
   });
@@ -23,9 +27,21 @@ async function parseVCFFile(filename, start, end, minDP, limit) {
   const processedData = [];
 
   // Process each line of the VCF file
-  lines.forEach((line) => {
-    
-    if (line.startsWith("##")) {
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    //if fatherVarientCount && motherVarientCount && probandVarientCount are all equal to limit then stop the loop
+    if (
+      fatherVarientCount === limit &&
+      motherVarientCount === limit &&
+      probandVarientCount === limit
+    ) {
+      break;
+    }
+    if (!line) {
+      // Skip empty lines
+      continue;
+    } else if (line.startsWith("##")) {
       // Copy the header lines to each new file
       fileNames.forEach((fileName) => {
         fs.appendFileSync(fileName, line + "\n");
@@ -43,7 +59,7 @@ async function parseVCFFile(filename, start, end, minDP, limit) {
       });
     } else {
       // Process data line
-      console.log("line", line.split("\t"));
+
       const fields = line.split("\t");
       const chrom = fields[0];
       const pos = parseInt(fields[1]);
@@ -56,34 +72,54 @@ async function parseVCFFile(filename, start, end, minDP, limit) {
         info[key] = value;
       });
       const formatFields = fields[8].split(":");
-      console.log("fields",fields)
-      console.log("chrom", chrom)
-      console.log("pos", pos)
-      console.log("ref", ref)
-      console.log("alt", alt)
-      console.log("infoItems", infoItems)
+      // console.log("fields", fields);
+      // console.log("chrom", chrom);
+      // console.log("pos", pos);
+      // console.log("ref", ref);
+      // console.log("alt", alt);
+      // console.log("infoItems", infoItems);
 
-      //sample data can be in the 9th - father 10th - mother  11th - proband
-      const sampleFather = line.split("\t")[9];
-      const sampleMother = line.split("\t")[10];
-      const sampleProband = line.split("\t")[11];
-      const relevantLine = `${sampleFather}\t${sampleMother}\t${sampleProband}`;
+      //start,end, minDP are optional
+      //limit is the number of max varients for each file
+      if (start && pos >= start) {
+        if (end && pos <= end) {
+          if (minDP && info.DP >= minDP) {
+            //sample data can be in the 9th - father 10th - mother  11th - proband
+            const sampleFather = line.split("\t")[9];
+            const sampleMother = line.split("\t")[10];
+            const sampleProband = line.split("\t")[11];
+            // cut the sample data from the line
+            line = line.split("\t").slice(0, 9).join("\t");
+            //should be seen something like: 0/1:7,2:0.222:9:63:63,0,288:0,7,2,0 if exsit or something like: ./.:.:.:.:.:.:. if not
+            //so check if the sample contains numbers if so it exists else it doesnt
+            if (sampleFather.match(/\d+/g)) {
+              if (fatherVarientCount < limit) {
+                //push the fieldes in index 0-8 and add the sample data in index 9
+                fs.appendFileSync(fileNames[0], `${line}\t${sampleFather}\n`);
 
-      // Add the relevant line to the corresponding processed data array
-      const relevantData = processedData.find(
-        (data) => data.fileName === "proband_filtered.vcf"
-      );
-      if (relevantData) {
-        relevantData.lines.push(relevantLine);
+                
+                fatherVarientCount++;
+              }
+            }
+            if (sampleMother.match(/\d+/g)) {
+              if (motherVarientCount < limit) {
+                fs.appendFileSync(fileNames[1], `${line}\t${sampleMother}\n`);
+                motherVarientCount++;
+              }
+            }
+            if (sampleProband.match(/\d+/g)) {
+              if (probandVarientCount < limit) {
+                fs.appendFileSync(fileNames[2], `${line}\t${sampleProband}\n`);
+                probandVarientCount++;
+              }
+            }
+          }
+        }
       }
     }
-  });
-
-  // Write the first 10 lines after the header line to each file
-  processedData.forEach((data) => {
-    const { fileName, lines } = data;
-    fs.appendFileSync(fileName, lines.slice(0, 11).join("\n"));
-  });
+  }
+  // i want to return a success message
+  return "success";
 }
 
 module.exports = {
