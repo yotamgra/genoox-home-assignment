@@ -12,7 +12,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Define a route - doesnt work
 app.use("/process-vcf", vcfRoutes);
 
 app.use(errorHandler);
