@@ -28,7 +28,7 @@ lines.forEach((line) => {
   if (line.startsWith("##")) {
     // Copy the header lines to each new file
     fileNames.forEach((fileName) => {
-      fs.writeFileSync(fileName, line + "\n");
+      fs.appendFileSync(fileName, line + "\n");
     });
   } else if (line.startsWith("#")) {
     // Process header line starting with "#"
@@ -38,7 +38,7 @@ lines.forEach((line) => {
     ///here i want to add for each file this line
     fileNames.forEach((fileName) => {
       const sample = fileName.split("_")[0];
-      fs.writeFileSync(fileName, `${ColumnKeys}\t${sample}`);
+      fs.appendFileSync(fileName, `${ColumnKeys}\t${sample}`);
     });
   } else {
     // Process data line
