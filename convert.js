@@ -1,10 +1,13 @@
+
+const gunzip = require('gunzip-file');
+
 import axios from "axios";
 import fs from "fs";
-import { createGunzip } from "zlib";
+import { gunzip } from "gunzip-file";
 
 const url =
   "https://s3.amazonaws.com/resources.genoox.com/homeAssingment/demo_vcf_multisample.vcf.gz";
-const downloadFolderPath = "src/downloads/";
+const downloadFolderPath = "downloads/"; // Specify the folder path here
 const gzippedFile = downloadFolderPath + "output.vcf.gz";
 const outputFile = downloadFolderPath + "output.vcf";
 
@@ -28,23 +31,10 @@ export const downloadFile = async () => {
   }
 };
 
-export async function convertFileToText() {
+async function convertFileToText() {
   try {
     await downloadFile();
-    const gunzipPromise = new Promise((resolve, reject) => {
-      const gunzip = createGunzip();
-      const inputStream = fs.createReadStream(gzippedFile);
-      const outputStream = fs.createWriteStream(outputFile);
-      
-      inputStream.pipe(gunzip).pipe(outputStream);
-
-      inputStream.on("end", resolve);
-      gunzip.on("error", reject);
-      outputStream.on("error", reject);
-    });
-
-    await gunzipPromise;
-
+    await gunzip(gzippedFile, outputFile);
     console.log("File converted to text successfully.");
   } catch (error) {
     console.error("An error occurred:", error);
