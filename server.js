@@ -1,7 +1,7 @@
-const express = require("express");
-const cors = require("cors");
-const vcfRoutes = require("./src/routes/vcfRoutes");
-const errorHandler = require("./src/middleweare/errorMiddleweare");
+import express from "express";
+import cors from "cors";
+import vcfRoutes from "./src/routes/vcfRoutes.js";
+import errorHandler from "./src/middleweare/errorMiddleweare.js";
 
 const app = express();
 const port = 3000;

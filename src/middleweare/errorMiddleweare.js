@@ -1,4 +1,4 @@
-const errorHandler = (err, req, res, next) => {
+ const errorHandler = (err, req, res, next) => {
     const statusCode =
       res.statusCode && res.statusCode !== 200 ? res.statusCode : 500;
   
@@ -10,5 +10,5 @@ const errorHandler = (err, req, res, next) => {
     });
   };
   
-  module.exports = errorHandler;
+  export default errorHandler
   

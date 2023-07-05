@@ -1,9 +1,8 @@
-const express = require("express");
-
-const vcfController = require("../controllers/vcfController");
+import express from "express";
+import { processVcf, test } from "../controllers/vcfController.js";
 
 const router = express.Router();
 
-router.route("/").post(vcfController.processVcf).get(vcfController.test);
+router.route("/").post(processVcf).get(test);
 
-module.exports = router;
+export default router;

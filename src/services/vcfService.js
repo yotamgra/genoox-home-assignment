@@ -1,7 +1,7 @@
-const fs = require("fs");
-const { createGunzip } = require("zlib");
+import fs from "fs";
+import { createGunzip } from "zlib";
 
-async function parseVCFFile(filename, start, end, minDP, limit) {
+export const parseVCFFile = (filename, start, end, minDP, limit) => {
   // Create the three new files: father_filtered.vcf, mother_filtered.vcf, proband_filtered.vcf
   const fileNames = [
     "src/files/father_filtered.vcf",
@@ -54,7 +54,6 @@ async function parseVCFFile(filename, start, end, minDP, limit) {
 
       ///Add the column keys - tle line wich starts with # with the relevant sample
       fileNames.forEach((fileName) => {
-        
         const sample = fileName.split("_")[0].split("/")[2];
         fs.appendFileSync(fileName, `${ColumnKeys}\t${sample}\n`);
       });
@@ -98,7 +97,6 @@ async function parseVCFFile(filename, start, end, minDP, limit) {
                 //push the fieldes in index 0-8 and add the sample data in index 9
                 fs.appendFileSync(fileNames[0], `${line}\t${sampleFather}\n`);
 
-                
                 fatherVarientCount++;
               }
             }
@@ -121,8 +119,6 @@ async function parseVCFFile(filename, start, end, minDP, limit) {
   }
   // i want to return a success message
   return "success";
-}
-
-module.exports = {
-  parseVCFFile,
 };
+
+

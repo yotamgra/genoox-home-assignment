@@ -1,22 +1,14 @@
-const fs = require("fs");
-const archiver = require("archiver");
-
-const asyncHandler = require("async-handler");
-const vcfService = require("../services/vcfService");
-const createZipFile = require("../services/createZipFile");
+import fs from "fs";
+import asyncHandler from "async-handler";
+import { parseVCFFile } from "../services/vcfService.js";
+import { createZipFile } from "../services/createZipFile.js";
 
 // const processVcf = asyncHandler(async (req, res) => {
 //   res.json(req.body);
 // });
-const processVcf = async (req, res) => {
+export const processVcf = async (req, res) => {
   const { start, end, minDP, limit } = req.body;
-  await vcfService.parseVCFFile(
-    "src/sevices/output.vcf",
-    start,
-    end,
-    minDP,
-    limit
-  );
+  await parseVCFFile("src/sevices/output.vcf", start, end, minDP, limit);
   try {
     const rootFolder = "src/files";
     const zipFilePath = await createZipFile(rootFolder);
@@ -40,12 +32,7 @@ const processVcf = async (req, res) => {
     // Handle the error and send an appropriate response
   }
 };
-const test = asyncHandler(async (req, res) => {
+export const test = asyncHandler(async (req, res) => {
   console.log("first");
   res.send("test");
 });
-
-module.exports = {
-  processVcf,
-  test,
-};

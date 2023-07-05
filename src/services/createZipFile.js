@@ -1,7 +1,7 @@
-const fs = require("fs");
-const archiver = require("archiver");
+import fs from "fs";
+import archiver from "archiver";
 
-function createZipFile(rootFolder) {
+export const createZipFile = (rootFolder) => {
   const files = [
     `${rootFolder}/father_filtered.vcf`,
     `${rootFolder}/mother_filtered.vcf`,
@@ -37,6 +37,5 @@ function createZipFile(rootFolder) {
 
     zipStream.on("error", reject);
   });
-}
+};
 
-module.exports = createZipFile;

@@ -1,4 +1,4 @@
-const fs = require("fs");
+import fs from "fs";
 
 // Create the three new files: father_filtered.vcf, mother_filtered.vcf, proband_filtered.vcf
 const fileNames = [
