@@ -91,8 +91,9 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
             ];
             let gene;
             for (let sampleInfo of sampleData) {
-              const { fieldName, sample, count, fileIndex } = sampleInfo;
-              if (sample.match(/\d+/g) && count < limit) {
+              const { fieldName, sample,  fileIndex } = sampleInfo;
+              if (sample.match(/\d+/g) && countVarientMap.get(fieldName) < limit) {
+                
                 gene =
                   gene || (await fetchVariantDetails({ chr, pos, ref, alt }));
                 const newInfo = `${fields[7]};GENE=${gene}`;
@@ -104,6 +105,7 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
                   fieldName,
                   countVarientMap.get(fieldName) + 1
                 );
+                console.log(countVarientMap.get(fieldName), "count" , fieldName)
               }
             }
           }
