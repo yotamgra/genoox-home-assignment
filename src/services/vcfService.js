@@ -44,7 +44,7 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
     } else if (line.startsWith("#")) {
       // Process line starting with "#"
       const ColumnKeys = line.split("\t").slice(0, 9).join("\t");
-      
+
       ///For each file, add the column keys and relevant sample
       fileNames.forEach((fileName) => {
         const sample = fileName.split("_")[0].split("/")[2];
@@ -92,11 +92,12 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
                 fileIndex: 2,
               },
             ];
-
+            let gene;
             for (let sampleInfo of sampleData) {
               const { fieldName, sample, count, fileIndex } = sampleInfo;
               if (sample.match(/\d+/g) && count < limit) {
-                const gene = await fetchVariantDetails({ chr, pos, ref, alt });
+                gene =
+                  gene || (await fetchVariantDetails({ chr, pos, ref, alt }));
                 const newInfo = `${fields[7]};GENE=${gene}`;
                 fs.appendFileSync(
                   fileNames[fileIndex],
