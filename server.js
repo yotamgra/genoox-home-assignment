@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-const vcfRoutes = require("./routes/vcfRoutes");
-const errorHandler = require("./middleweare/errorMiddleweare");
+const vcfRoutes = require("./src/routes/vcfRoutes");
+const errorHandler = require("./src/middleweare/errorMiddleweare");
 
 const app = express();
 const port = 3000;

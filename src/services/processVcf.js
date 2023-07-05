@@ -12,7 +12,7 @@ fileNames.forEach((fileName) => {
 
 // Read the VCF file
 const vcfData = fs.readFileSync(
-  "C:/Users/yotam/genoox-home-assignment/services/output.vcf",
+  "src/services/output.vcf",
   "utf8"
 );
 
