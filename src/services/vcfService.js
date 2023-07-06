@@ -3,6 +3,9 @@ import axios from "axios";
 import { lines } from "./fetchVcf.js";
 
 export const parseVCFFile = async (filename, start, end, minDP, limit) => {
+  if (lines.length === 0) {
+    throw new Error("You should fetch the file first");
+  }
 
   const fileNames = [
     "src/files/father_filtered.vcf",
@@ -18,7 +21,7 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
   fileNames.forEach((fileName) => {
     fs.writeFileSync(fileName, "");
   });
-  console.log(fileNames)
+  
 
   for (let line of lines) {
     if (
