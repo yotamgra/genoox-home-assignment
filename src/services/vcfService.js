@@ -1,8 +1,13 @@
 import fs from "fs";
 import axios from "axios";
+import { lines } from "./fetchVcf.js";
+import { log } from "console";
 
 export const parseVCFFile = async (filename, start, end, minDP, limit) => {
-  // Create the three new files: father_filtered.vcf, mother_filtered.vcf, proband_filtered.vcf
+  if (lines.length === 0) {
+    throw new Error("You should fetch the file first");
+  }
+
   const fileNames = [
     "src/files/father_filtered.vcf",
     "src/files/mother_filtered.vcf",
@@ -18,14 +23,9 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
     fs.writeFileSync(fileName, "");
   });
 
-  // Read the VCF file
-  const vcfData = fs.readFileSync("src/downloads/output.vcf", "utf8");
-
-  // Split the file into individual lines
-  const lines = vcfData.split("\n");
-
-  // Process each line of the VCF file
+  let index = 0;
   for (let line of lines) {
+    index++;
     if (
       countVarientMap.get("father") === limit &&
       countVarientMap.get("mother") === limit &&
@@ -48,18 +48,23 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
       ///For each file, add the column keys and relevant sample
       fileNames.forEach((fileName) => {
         const sample = fileName.split("_")[0].split("/")[2];
+
         fs.appendFileSync(fileName, `${ColumnKeys}\t${sample}\n`);
       });
     } else {
       // Process data line
+     
       const fields = line.split("\t");
       // Extract the fields from the line
       const [chr, pos, id, ref, alt, qual, filter, infoItems, formatFields] =
         fields;
+   
+     
       const infoItemsArr = infoItems.split(";");
       const info = {};
       infoItemsArr.forEach((item) => {
         const [key, value] = item.split("=");
+
         info[key] = value;
       });
 
