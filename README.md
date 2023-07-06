@@ -8,10 +8,12 @@ To get started with the project, follow these steps:
 1. Install the project dependencies using the command: `npm install`.
 2.  the server using the command: `npm start`.
 
-#### Downloading the File
-To download the .vcf file to the server, please access the following URL in your browser or API client:
+#### Fetching the File
+To fetch the .vcf file to the server, please access the following URL in your browser or API client:
 
-**URL:**  localhost:3000/process-vcf/download
+**URL:**  localhost:3000/process-vcf/fetch
+
+**Note**: Remember to fetch the file when starting the server.
 
 #### Performing the Request
 To execute the processing request, make a POST request to the following URL:
@@ -34,4 +36,6 @@ The output variant line for each sample will include a new subfield in the INFO 
 By providing these parameters in the request body, you can customize the filtering and output behavior according to your requirements.
 
 The response to this request will be the downloading of the **filtered_files.zip** file.
+
+**Note:** If you want to watch the file before compressing it, you need to comment out line 38 in the **createZipFile.js** file.
 

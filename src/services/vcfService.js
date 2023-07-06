@@ -1,5 +1,6 @@
 import fs from "fs";
 import axios from "axios";
+import { lines } from "./fetchVcf.js";
 
 export const parseVCFFile = async (filename, start, end, minDP, limit) => {
 
@@ -19,13 +20,6 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
   });
   console.log(fileNames)
 
-  // Read the VCF file
-  const vcfData = fs.readFileSync("src/downloads/output.vcf", "utf8");
-
-  // Split the file into individual lines
-  const lines = vcfData.split("\n");
-
-  // Process each line of the VCF file
   for (let line of lines) {
     if (
       countVarientMap.get("father") === limit &&
