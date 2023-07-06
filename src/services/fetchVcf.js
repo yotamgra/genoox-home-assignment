@@ -6,7 +6,7 @@ import { PassThrough } from "stream";
 
 export const lines = [];
 
-export const featchVcf = asyncHandler(async (req, res) => {
+export const fetchVcf = asyncHandler(async (req, res) => {
     try {
       // Fetch the zipped VCF file
       const vcfUrl =
