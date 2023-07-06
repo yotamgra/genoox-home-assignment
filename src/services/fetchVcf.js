@@ -4,7 +4,7 @@ import zlib from "zlib";
 import asyncHandler from "express-async-handler";
 import { PassThrough } from "stream";
 
-export const lines = [];
+export let lines = [];
 export const cacheAPICalls = new Map();
 
 export const fetchVcf = asyncHandler(async (req, res) => {
