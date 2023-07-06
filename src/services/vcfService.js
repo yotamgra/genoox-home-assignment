@@ -1,6 +1,6 @@
 import fs from "fs";
 import axios from "axios";
-import { lines } from "./streamingVcf.js";
+import { lines } from "./fetchVcf.js";
 
 export const parseVCFFile = async (filename, start, end, minDP, limit) => {
   // Create the three new files: father_filtered.vcf, mother_filtered.vcf, proband_filtered.vcf
