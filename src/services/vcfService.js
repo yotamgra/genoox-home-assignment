@@ -53,19 +53,13 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
       });
     } else {
       // Process data line
-      console.log(line, index, "line and index");
+     
       const fields = line.split("\t");
       // Extract the fields from the line
       const [chr, pos, id, ref, alt, qual, filter, infoItems, formatFields] =
         fields;
-      console.log(fields, "fields");
-      console.log(infoItems, "infoItems");
-      if (!infoItems) {
-        console.log(index, "index when infoItems is empty");
-        for (let i = 0; i < 15; i++) {
-          console.log(lines[i].substring(0, 2));
-        }
-      }
+   
+     
       const infoItemsArr = infoItems.split(";");
       const info = {};
       infoItemsArr.forEach((item) => {

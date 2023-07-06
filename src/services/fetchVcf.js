@@ -4,46 +4,34 @@ import zlib from "zlib";
 import asyncHandler from "express-async-handler";
 import { PassThrough } from "stream";
 
-export const lines = [];
+export let lines = [];
 
 export const fetchVcf = asyncHandler(async (req, res) => {
-  try {
-    // Fetch the zipped VCF file
-    const vcfUrl =
-      "https://s3.amazonaws.com/resources.genoox.com/homeAssingment/demo_vcf_multisample.vcf.gz";
-    const response = await axios.get(vcfUrl, { responseType: "stream" });
+  // Fetch the zipped VCF file
+  const vcfUrl =
+    "https://s3.amazonaws.com/resources.genoox.com/homeAssingment/demo_vcf_multisample.vcf.gz";
+  const response = await axios.get(vcfUrl, { responseType: "stream" });
 
-    // Create a PassThrough stream
-    const ourStream = new PassThrough();
+  // Create a PassThrough stream
+  const ourStream = new PassThrough();
 
-    // Pipe the response stream to our PassThrough stream
-    response.data.pipe(zlib.createGunzip()).pipe(ourStream);
+  const gunzip = zlib.createGunzip();
 
-    // Process the data from our PassThrough stream
-    let vcfData = "";
+  // Pipe the response stream to our PassThrough stream
+  response.data.pipe(gunzip).pipe(ourStream);
 
-    ourStream.on("data", (chunk) => {
-      const chunkData = chunk.toString();
-      vcfData += chunkData;
-      // Process the individual lines from the chunk
-      const chunkLines = chunkData.split("\n");
-      lines.push(...chunkLines);
-    });
+  // Process the data from our PassThrough stream
+  let vcfData = "";
 
-    ourStream.on("end", () => {
-      // Processing complete
-      console.log("File read successfully");
+  ourStream.on("data", function (chunk) {
+    vcfData += chunk.toString("utf8");
+  });
 
-      res.send("File read successfully");
-    });
+  ourStream.on("end", () => {
+    lines = vcfData.split("\n");
+    // Processing complete
+    console.log("File read successfully");
 
-    ourStream.on("error", (error) => {
-      // Error handling
-      console.error("Error:", error.message);
-      res.status(500).send("Internal Server Error");
-    });
-  } catch (error) {
-    console.error("Error:", error.message);
-    res.status(500).send("Internal Server Error");
-  }
+    res.send("File read successfully");
+  });
 });

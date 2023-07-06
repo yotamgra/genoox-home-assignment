@@ -36,7 +36,7 @@ export const createZipFile = (rootFolder) => {
       resolve(zipFileName);
       //i want to delete the files after sending the zip file
       files.forEach((filePath) => {
-        // fs.unlinkSync(filePath);
+        fs.unlinkSync(filePath);
       });
     });
 
