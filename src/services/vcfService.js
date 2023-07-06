@@ -1,6 +1,7 @@
 import fs from "fs";
 import axios from "axios";
-import { lines } from "./fetchVcf.js";
+import { lines,cacheAPICalls } from "./fetchVcf.js";
+
 
 export const parseVCFFile = async (filename, start, end, minDP, limit) => {
   // Create the three new files: father_filtered.vcf, mother_filtered.vcf, proband_filtered.vcf
@@ -86,8 +87,9 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
                 IsSampleContainDigit &&
                 countVarientMap.get(fieldName) < limit
               ) {
+                
                 gene =
-                  gene || (await fetchVariantDetails({ chr, pos, ref, alt }));
+                  gene || cacheAPICalls.get(`${chr}:${pos}:${ref}:${alt}`) ||  (await fetchVariantDetails({ chr, pos, ref, alt }));
                 const newInfo = `${fields[7]};GENE=${gene}`;
                 fs.appendFileSync(
                   fileNames[fileIndex],
@@ -121,5 +123,6 @@ const fetchVariantDetails = async ({ chr, pos, ref, alt }) => {
       reference_version: REFERENCE_VERSION,
     },
   });
+  cacheAPICalls.set(`${chr}:${pos}:${ref}:${alt}`, response.data.gene);
   return response.data.gene;
 };

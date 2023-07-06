@@ -5,6 +5,7 @@ import asyncHandler from "express-async-handler";
 import { PassThrough } from "stream";
 
 export const lines = [];
+export const cacheAPICalls = new Map();
 
 export const featchVcf = asyncHandler(async (req, res) => {
     try {
