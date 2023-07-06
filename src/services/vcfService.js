@@ -1,6 +1,6 @@
 import fs from "fs";
 import axios from "axios";
-import {lines} from "./streamingVcf.js";
+import { lines } from "./streamingVcf.js";
 
 export const parseVCFFile = async (filename, start, end, minDP, limit) => {
   // Create the three new files: father_filtered.vcf, mother_filtered.vcf, proband_filtered.vcf
@@ -19,13 +19,6 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
     fs.writeFileSync(fileName, "");
   });
 
-  // Read the VCF file
-  // const vcfData = fs.readFileSync("src/downloads/output.vcf", "utf8");
-
-  // Split the file into individual lines
-  // const lines = vcfData.split("\n");
-
-  // Process each line of the VCF file
   for (let line of lines) {
     if (
       countVarientMap.get("father") === limit &&

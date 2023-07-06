@@ -33,8 +33,7 @@ export const streamingVcf = asyncHandler(async (req, res) => {
       ourStream.on("end", () => {
         // Processing complete
         console.log("File read successfully");
-        console.log("Lines:", lines); // Access the lines array here
-        // Continue with further processing or response handling
+       
         res.send("File read successfully");
       });
   
