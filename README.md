@@ -33,5 +33,5 @@ The output variant line for each sample will include a new subfield in the INFO 
 
 By providing these parameters in the request body, you can customize the filtering and output behavior according to your requirements.
 
-The response to this request will be the downloading of the** filtered_files.zip** file.
+The response to this request will be the downloading of the **filtered_files.zip** file.
 
