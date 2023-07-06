@@ -1,6 +1,7 @@
 import fs from "fs";
 import axios from "axios";
 import { lines } from "./fetchVcf.js";
+import { log } from "console";
 
 export const parseVCFFile = async (filename, start, end, minDP, limit) => {
   if (lines.length === 0) {
@@ -42,22 +43,26 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
     } else if (line.startsWith("#")) {
       // Process line starting with "#"
       const ColumnKeys = line.split("\t").slice(0, 9).join("\t");
-
+      console.log(line, "line")
       ///For each file, add the column keys and relevant sample
       fileNames.forEach((fileName) => {
         const sample = fileName.split("_")[0].split("/")[2];
+        console.log(fileName, "fileName");
         fs.appendFileSync(fileName, `${ColumnKeys}\t${sample}\n`);
       });
     } else {
       // Process data line
       const fields = line.split("\t");
+      console.log(line, "line");
       // Extract the fields from the line
       const [chr, pos, id, ref, alt, qual, filter, infoItems, formatFields] =
         fields;
       const infoItemsArr = infoItems.split(";");
+      console.log(infoItems, "infoItems");
       const info = {};
       infoItemsArr.forEach((item) => {
         const [key, value] = item.split("=");
+        console.log(item, "item");
         info[key] = value;
       });
 

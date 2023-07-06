@@ -24,6 +24,7 @@ export const createZipFile = (rootFolder) => {
     // Add files to the archive
     files.forEach((filePath) => {
       const fileName = filePath.split("/").pop(); // Extract the filename from the path
+      console.log(filePath, "filePath");
       archive.file(filePath, { name: fileName });
     });
 
@@ -35,7 +36,7 @@ export const createZipFile = (rootFolder) => {
       resolve(zipFileName);
       //i want to delete the files after sending the zip file
       files.forEach((filePath) => {
-        fs.unlinkSync(filePath);
+        // fs.unlinkSync(filePath);
       });
     });
 
