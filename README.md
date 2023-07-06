@@ -14,7 +14,7 @@ To download the .vcf file to the server, please access the following URL in your
 
 #### Performing the Request
 To execute the processing request, make a POST request to the following URL:
-**URL:** [localhost:3000/process-vcf](URL: localhost:3000/process-vcf "localhost:3000/process-vcf")
+**URL:** [localhost:3000/process-vcf](localhost:3000/process-vcf "localhost:3000/process-vcf")
 
 **Request Body:**
 The request body contains parameters that control the processing and filtering of the .vcf file. Here is an explanation of each parameter:
