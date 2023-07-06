@@ -2,7 +2,7 @@ import fs from "fs";
 import axios from "axios";
 
 export const parseVCFFile = async (filename, start, end, minDP, limit) => {
-  // Create the three new files: father_filtered.vcf, mother_filtered.vcf, proband_filtered.vcf
+
   const fileNames = [
     "src/files/father_filtered.vcf",
     "src/files/mother_filtered.vcf",
@@ -17,6 +17,7 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
   fileNames.forEach((fileName) => {
     fs.writeFileSync(fileName, "");
   });
+  console.log(fileNames)
 
   // Read the VCF file
   const vcfData = fs.readFileSync("src/downloads/output.vcf", "utf8");
