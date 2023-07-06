@@ -22,9 +22,10 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
   fileNames.forEach((fileName) => {
     fs.writeFileSync(fileName, "");
   });
-  
 
+  let index = 0;
   for (let line of lines) {
+    index++;
     if (
       countVarientMap.get("father") === limit &&
       countVarientMap.get("mother") === limit &&
@@ -43,26 +44,33 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
     } else if (line.startsWith("#")) {
       // Process line starting with "#"
       const ColumnKeys = line.split("\t").slice(0, 9).join("\t");
-      console.log(line, "line")
+
       ///For each file, add the column keys and relevant sample
       fileNames.forEach((fileName) => {
         const sample = fileName.split("_")[0].split("/")[2];
-        console.log(fileName, "fileName");
+
         fs.appendFileSync(fileName, `${ColumnKeys}\t${sample}\n`);
       });
     } else {
       // Process data line
+      console.log(line, index, "line and index");
       const fields = line.split("\t");
-      console.log(line, "line");
       // Extract the fields from the line
       const [chr, pos, id, ref, alt, qual, filter, infoItems, formatFields] =
         fields;
-      const infoItemsArr = infoItems.split(";");
+      console.log(fields, "fields");
       console.log(infoItems, "infoItems");
+      if (!infoItems) {
+        console.log(index, "index when infoItems is empty");
+        for (let i = 0; i < 15; i++) {
+          console.log(lines[i].substring(0, 2));
+        }
+      }
+      const infoItemsArr = infoItems.split(";");
       const info = {};
       infoItemsArr.forEach((item) => {
         const [key, value] = item.split("=");
-        console.log(item, "item");
+
         info[key] = value;
       });
 

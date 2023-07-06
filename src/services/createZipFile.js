@@ -24,7 +24,7 @@ export const createZipFile = (rootFolder) => {
     // Add files to the archive
     files.forEach((filePath) => {
       const fileName = filePath.split("/").pop(); // Extract the filename from the path
-      console.log(filePath, "filePath");
+      
       archive.file(filePath, { name: fileName });
     });
 
