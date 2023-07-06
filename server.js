@@ -1,10 +1,13 @@
 import express from "express";
 import cors from "cors";
+import * as dotenv from "dotenv";
 import vcfRoutes from "./src/routes/vcfRoutes.js";
 import errorHandler from "./src/middleweare/errorMiddleweare.js";
 
 const app = express();
-const port = 3000;
+
+dotenv.config(); 
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 

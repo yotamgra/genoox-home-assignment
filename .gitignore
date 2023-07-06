@@ -4,3 +4,7 @@ node_modules
 
 output.vcf
 output.vcf.gz
+
+father_filtered.vcf
+mother_filtered.vcf
+proband_filtered.vcf

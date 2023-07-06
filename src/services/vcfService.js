@@ -53,20 +53,15 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
     } else {
       // Process data line
       const fields = line.split("\t");
-      const chr = fields[0];
-      const pos = parseInt(fields[1]);
-      const id = fields[2];
-      const ref = fields[3];
-      const alt = fields[4];
-      const qual = fields[5];
-      const filter = fields[6];
-      const infoItems = fields[7].split(";");
+      // Extract the fields from the line
+      const [chr, pos, id, ref, alt, qual, filter, infoItems, formatFields] =
+        fields;
+      const infoItemsArr = infoItems.split(";");
       const info = {};
-      infoItems.forEach((item) => {
+      infoItemsArr.forEach((item) => {
         const [key, value] = item.split("=");
         info[key] = value;
       });
-      const formatFields = fields[8];
 
       if (!start || pos >= start) {
         if (!end || pos <= end) {
@@ -92,8 +87,9 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
             let gene;
             for (let sampleInfo of sampleData) {
               const { fieldName, sample, fileIndex } = sampleInfo;
+              const IsSampleContainDigit = /\d/.test(sample);
               if (
-                sample.match(/\d+/g) &&
+                IsSampleContainDigit &&
                 countVarientMap.get(fieldName) < limit
               ) {
                 gene =
@@ -114,22 +110,21 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
       }
     }
   }
-
-  return "success";
 };
 
 const fetchVariantDetails = async ({ chr, pos, ref, alt }) => {
   const VariantDetailsURL =
     "https://franklin.genoox.com/api/fetch_variant_details";
+  const REFERENCE_VERSION = "hg19";
   const response = await axios({
     method: "post",
     url: VariantDetailsURL,
     data: {
-      chr: chr,
-      pos: pos,
-      ref: ref,
-      alt: alt,
-      reference_version: "hg19",
+      chr,
+      pos,
+      ref,
+      alt,
+      reference_version: REFERENCE_VERSION,
     },
   });
   return response.data.gene;

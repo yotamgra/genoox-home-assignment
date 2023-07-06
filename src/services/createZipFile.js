@@ -15,7 +15,7 @@ export const createZipFile = (rootFolder) => {
 
     // Create a new ZIP archive
     const archive = archiver("zip", {
-      zlib: { level: 9 }, // Set compression level 
+      zlib: { level: 9 }, // Set compression level
     });
 
     // Pipe the archive to the zipStream
@@ -33,12 +33,12 @@ export const createZipFile = (rootFolder) => {
     // Resolve the promise when the ZIP file creation is complete
     zipStream.on("close", () => {
       resolve(zipFileName);
+      //i want to delete the files after sending the zip file
+      files.forEach((filePath) => {
+        fs.unlinkSync(filePath);
+      });
     });
 
     zipStream.on("error", reject);
   });
 };
-
-
-
-
