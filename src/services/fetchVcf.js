@@ -5,6 +5,7 @@ import asyncHandler from "express-async-handler";
 import { PassThrough } from "stream";
 
 export let lines = [];
+export const cacheAPICalls = new Map();
 
 export const fetchVcf = asyncHandler(async (req, res) => {
   // Fetch the zipped VCF file
