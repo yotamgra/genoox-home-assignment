@@ -4,7 +4,7 @@ import { processVarient } from "./processVarient.js";
 
 export const countVarientMap = new Map();
 
-export const parseVCFFile = async ({ start, end, minDP, limit,  deNovo}) => {
+export const parseVCFFile = async ({ start, end, minDP, limit, deNovo }) => {
   if (lines.length === 0) {
     throw new Error("You should fetch the file first");
   }
@@ -12,7 +12,7 @@ export const parseVCFFile = async ({ start, end, minDP, limit,  deNovo}) => {
 
   // Initialize variant count map
   samplesEntries.forEach((sample) => {
-    countVarientMap.set(sample.sampleName, 0);
+    countVarientMap.set(sample.name, 0);
   });
 
   for (let line of lines) {
@@ -34,13 +34,10 @@ export const parseVCFFile = async ({ start, end, minDP, limit,  deNovo}) => {
     } else if (line.startsWith("#")) {
       // Process line starting with "#"
       const ColumnKeys = line.split("\t").slice(0, 9).join("\t");
-     
+
       ///For each file, add the column keys and relevant sample
       samplesEntries.forEach((sample) => {
-        fs.appendFileSync(
-          sample.fileName,
-          `${ColumnKeys}\t${sample.name}\n`
-        );
+        fs.appendFileSync(sample.fileName, `${ColumnKeys}\t${sample.name}\n`);
       });
     } else {
       // Process data line
@@ -53,7 +50,7 @@ export const parseVCFFile = async ({ start, end, minDP, limit,  deNovo}) => {
         end,
         minDP,
         limit,
-        deNovo
+        deNovo,
       };
 
       if (!end) {

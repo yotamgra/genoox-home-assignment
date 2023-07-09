@@ -39,25 +39,20 @@ export const processVarient = async ({
     });
 
     let gene;
-   
 
     for (let sampleKey in samplesData) {
       const sample = samplesData[sampleKey];
       const IsSampleContainDigit = /\d/.test(sample.value);
+
       const sampleCount = countVarientMap.get(sample.name);
 
       if (IsSampleContainDigit && sampleCount < limit) {
         gene = gene || (await getGeneFromCacheOrAPI({ chr, pos, ref, alt }));
-
         const newInfo = `${infoItems};GENE=${gene}`;
-
         const variant = `${chr}\t${pos}\t${id}\t${ref}\t${alt}\t${qual}\t${filter}\t${newInfo}\t${formatFields}\t${sample.value}\n`;
         samplesData[sampleKey].variant = variant;
-        // fs.appendFileSync(sample.fileName, variant);
-        // countVarientMap.set(sample.name, sampleCount + 1);
       }
     }
-    // console.log("samplesData", samplesData);
 
     for (let sampleKey in samplesData) {
       const sample = samplesData[sampleKey];
@@ -68,22 +63,28 @@ export const processVarient = async ({
             !samplesData["father"].variant &&
             !samplesData["mother"].variant
           ) {
-            fs.appendFileSync(sample.fileName, sample.variant);
-            countVarientMap.set(sample.name, sampleCount + 1);
+            //do nothing
           }
         } else if (deNovo === false) {
           if (samplesData["father"].variant || samplesData["mother"].variant)
-            fs.appendFileSync(sample.fileName, sample.variant);
-            countVarientMap.set(sample.name, sampleCount + 1);
+            appendVariantToSampleFile({ sample, sampleCount });
+        } else {
+          if (deNovo === undefined || deNovo === null);
+          appendVariantToSampleFile({ sample, sampleCount });
         }
       } else {
+        // father or mother
         if (samplesData[sampleKey].variant) {
-          fs.appendFileSync(sample.fileName, sample.variant);
-          countVarientMap.set(sample.name, sampleCount + 1);
+          appendVariantToSampleFile({ sample, sampleCount });
         }
       }
     }
   }
+};
+
+const appendVariantToSampleFile = ({ sample, sampleCount }) => {
+  fs.appendFileSync(sample.fileName, sample.variant);
+  countVarientMap.set(sample.name, sampleCount + 1);
 };
 
 const getGeneFromCacheOrAPI = async ({ chr, pos, ref, alt }) => {
