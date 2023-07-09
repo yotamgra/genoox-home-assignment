@@ -2,7 +2,6 @@ import fs from "fs";
 import axios from "axios";
 import { countVarientMap } from "./vcfService.js";
 import { cacheAPICalls } from "./fetchVcf.js";
-import { get } from "http";
 
 export const processVarient = async ({
   samplesEntries,

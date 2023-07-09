@@ -1,4 +1,4 @@
-import http from "http";
+import fs from "fs";
 import axios from "axios";
 import zlib from "zlib";
 import asyncHandler from "express-async-handler";
@@ -33,6 +33,21 @@ export const fetchVcf = asyncHandler(async (req, res) => {
     // Processing complete
     console.log("File read successfully");
 
+    res.send("File read successfully");
+  });
+});
+
+export const readDownloadedVcf = asyncHandler(async (req, res) => {
+  const vcfFile = "src/downloads/output.vcf";
+  const fileStream = fs.createReadStream(vcfFile, "utf-8");
+  let vcfData = "";
+
+  fileStream.on("data", (data) => {
+    vcfData += data;
+  });
+  fileStream.on("end", () => {
+    lines = vcfData.split("\n");
+    console.log("File read successfully");
     res.send("File read successfully");
   });
 });
