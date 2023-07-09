@@ -2,6 +2,7 @@ import fs from "fs";
 import axios from "axios";
 import { countVarientMap } from "./vcfService.js";
 import { cacheAPICalls } from "./fetchVcf.js";
+import { get } from "http";
 
 export const processVarient = async ({
   sampleEntries,
@@ -40,11 +41,9 @@ export const processVarient = async ({
       const IsSampleContainDigit = /\d/.test(sampleValue);
 
       if (IsSampleContainDigit && countVarientMap.get(sampleName) < limit) {
-        gene =
-          gene ||
-          cacheAPICalls.get(`${chr}:${pos}:${ref}:${alt}`) ||
-          (await fetchVariantDetails({ chr, pos, ref, alt }));
-        const newInfo = `${fields[7]};GENE=${gene}`;
+        gene = gene || await getGeneFromCacheOrAPI({ chr, pos, ref, alt });
+
+        const newInfo = `${infoItems};GENE=${gene}`;
         fs.appendFileSync(
           fileName,
           `${chr}\t${pos}\t${id}\t${ref}\t${alt}\t${qual}\t${filter}\t${newInfo}\t${formatFields}\t${sampleValue}\n`
@@ -53,6 +52,13 @@ export const processVarient = async ({
       }
     }
   }
+};
+
+const getGeneFromCacheOrAPI = async ({ chr, pos, ref, alt }) => {
+  const gene =
+    cacheAPICalls.get(`${chr}:${pos}:${ref}:${alt}`) ||
+    (await fetchVariantDetails({ chr, pos, ref, alt }));
+  return gene;
 };
 
 const fetchVariantDetails = async ({ chr, pos, ref, alt }) => {
