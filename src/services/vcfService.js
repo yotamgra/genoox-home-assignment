@@ -48,24 +48,19 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
       // Process data line
       const fields = line.split("\t");
 
+      const processVarientArgs = {
+        sampleEntries,
+        fields,
+        start,
+        end,
+        minDP,
+        limit,
+      };
+
       if (!end) {
-        await processVarient({
-          sampleEntries,
-          fields,
-          start,
-          end,
-          minDP,
-          limit,
-        });
+        await processVarient(processVarientArgs);
       } else {
-        processVarient({
-          sampleEntries,
-          fields,
-          start,
-          end,
-          minDP,
-          limit,
-        });
+        processVarient(processVarientArgs);
       }
     }
   }
