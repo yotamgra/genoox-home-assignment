@@ -14,9 +14,6 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
   sampleEntries.forEach((sample) => {
     countVarientMap.set(sample.sampleName, 0);
   });
-  // countVarientMap.set("father", 0);
-  // countVarientMap.set("mother", 0);
-  // countVarientMap.set("proband", 0);
 
   for (let line of lines) {
     if (
@@ -50,8 +47,26 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
     } else {
       // Process data line
       const fields = line.split("\t");
-      
-       processVarient({ sampleEntries, fields, start, end, minDP, limit });
+
+      if (!end) {
+        await processVarient({
+          sampleEntries,
+          fields,
+          start,
+          end,
+          minDP,
+          limit,
+        });
+      } else {
+        processVarient({
+          sampleEntries,
+          fields,
+          start,
+          end,
+          minDP,
+          limit,
+        });
+      }
     }
   }
 };
