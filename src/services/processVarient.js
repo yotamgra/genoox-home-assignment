@@ -5,12 +5,13 @@ import { cacheAPICalls } from "./fetchVcf.js";
 import { get } from "http";
 
 export const processVarient = async ({
-  sampleEntries,
+  samplesEntries,
   fields,
   start,
   end,
   minDP,
   limit,
+  deNovo,
 }) => {
   // Extract the fields from the line
   const [chr, pos, id, ref, alt, qual, filter, infoItems, formatFields] =
@@ -30,26 +31,57 @@ export const processVarient = async ({
     (!minDP || info.DP >= minDP)
   ) {
     // Process sample data
-    const sampleData = sampleEntries.map((sample) => ({
-      ...sample,
-      sampleValue: fields[sample.sampleIndex],
-    }));
+    let samplesData = {};
+    samplesEntries.forEach((sample) => {
+      samplesData[sample.name] = {
+        ...sample,
+        value: fields[sample.index],
+      };
+    });
 
     let gene;
-    for (let sample of sampleData) {
-      const { sampleName, fileName, sampleValue } = sample;
-      const IsSampleContainDigit = /\d/.test(sampleValue);
-      const sampleCount = countVarientMap.get(sampleName);
+   
+
+    for (let sampleKey in samplesData) {
+      const sample = samplesData[sampleKey];
+      const IsSampleContainDigit = /\d/.test(sample.value);
+      const sampleCount = countVarientMap.get(sample.name);
 
       if (IsSampleContainDigit && sampleCount < limit) {
         gene = gene || (await getGeneFromCacheOrAPI({ chr, pos, ref, alt }));
 
         const newInfo = `${infoItems};GENE=${gene}`;
-        fs.appendFileSync(
-          fileName,
-          `${chr}\t${pos}\t${id}\t${ref}\t${alt}\t${qual}\t${filter}\t${newInfo}\t${formatFields}\t${sampleValue}\n`
-        );
-        countVarientMap.set(sampleName, sampleCount + 1);
+
+        const variant = `${chr}\t${pos}\t${id}\t${ref}\t${alt}\t${qual}\t${filter}\t${newInfo}\t${formatFields}\t${sample.value}\n`;
+        samplesData[sampleKey].variant = variant;
+        // fs.appendFileSync(sample.fileName, variant);
+        // countVarientMap.set(sample.name, sampleCount + 1);
+      }
+    }
+    // console.log("samplesData", samplesData);
+
+    for (let sampleKey in samplesData) {
+      const sample = samplesData[sampleKey];
+      const sampleCount = countVarientMap.get(sample.name);
+      if (sampleKey === "proband") {
+        if (deNovo) {
+          if (
+            !samplesData["father"].variant &&
+            !samplesData["mother"].variant
+          ) {
+            fs.appendFileSync(sample.fileName, sample.variant);
+            countVarientMap.set(sample.name, sampleCount + 1);
+          }
+        } else if (deNovo === false) {
+          if (samplesData["father"].variant || samplesData["mother"].variant)
+            fs.appendFileSync(sample.fileName, sample.variant);
+            countVarientMap.set(sample.name, sampleCount + 1);
+        }
+      } else {
+        if (samplesData[sampleKey].variant) {
+          fs.appendFileSync(sample.fileName, sample.variant);
+          countVarientMap.set(sample.name, sampleCount + 1);
+        }
       }
     }
   }

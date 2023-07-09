@@ -4,14 +4,14 @@ import { processVarient } from "./processVarient.js";
 
 export const countVarientMap = new Map();
 
-export const parseVCFFile = async (filename, start, end, minDP, limit) => {
+export const parseVCFFile = async ({ start, end, minDP, limit,  deNovo}) => {
   if (lines.length === 0) {
     throw new Error("You should fetch the file first");
   }
-  const sampleEntries = createFilferedFiles();
+  const samplesEntries = createFilferedFiles();
 
   // Initialize variant count map
-  sampleEntries.forEach((sample) => {
+  samplesEntries.forEach((sample) => {
     countVarientMap.set(sample.sampleName, 0);
   });
 
@@ -28,20 +28,18 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
       continue;
     } else if (line.startsWith("##")) {
       // Copy the header lines to each new file
-      sampleEntries.forEach((sample) => {
+      samplesEntries.forEach((sample) => {
         fs.appendFileSync(sample.fileName, line + "\n");
       });
     } else if (line.startsWith("#")) {
       // Process line starting with "#"
       const ColumnKeys = line.split("\t").slice(0, 9).join("\t");
-      const fields = line.split("\t");
-      // sample can be in any order in index 9,10,11
-
+     
       ///For each file, add the column keys and relevant sample
-      sampleEntries.forEach((sample) => {
+      samplesEntries.forEach((sample) => {
         fs.appendFileSync(
           sample.fileName,
-          `${ColumnKeys}\t${sample.sampleName}\n`
+          `${ColumnKeys}\t${sample.name}\n`
         );
       });
     } else {
@@ -49,12 +47,13 @@ export const parseVCFFile = async (filename, start, end, minDP, limit) => {
       const fields = line.split("\t");
 
       const processVarientArgs = {
-        sampleEntries,
+        samplesEntries,
         fields,
         start,
         end,
         minDP,
         limit,
+        deNovo
       };
 
       if (!end) {
@@ -83,19 +82,19 @@ const createFilferedFiles = () => {
       const samples = fields.slice(9, 12);
 
       const path = "src/files";
-      const sampleEntries = samples.map((sample, index) => {
+      const samplesEntries = samples.map((sample, index) => {
         return {
-          sampleName: sample,
-          sampleIndex: index + 9,
+          name: sample,
+          index: index + 9,
           fileName: `${path}/${sample}_filtered.vcf`,
         };
       });
 
-      sampleEntries.forEach((sample) => {
+      samplesEntries.forEach((sample) => {
         fs.writeFileSync(sample.fileName, "");
       });
 
-      return sampleEntries;
+      return samplesEntries;
     }
   }
 };

@@ -5,7 +5,7 @@ import { createZipFile } from "../services/createZipFile.js";
 import { convertFileToText } from "../services/download&convert.js";
 
 export const processVcf = asyncHandler(async (req, res) => {
-  const { start, end, minDP, limit } = req.body;
+  const { start, end, minDP, limit, deNovo } = req.body;
 
   if (!limit) {
     res.status(400);
@@ -17,11 +17,11 @@ export const processVcf = asyncHandler(async (req, res) => {
   }
   //time to process the file
   const startTimer = Date.now();
-  await parseVCFFile("src/sevices/output.vcf", start, end, minDP, limit);
+  await parseVCFFile({start, end, minDP, limit, deNovo});
   const endTimer = Date.now();
   const timeTaken = endTimer - startTimer;
   console.log("Time taken to process the file: ", timeTaken);
-  
+
   const rootFolder = "src/files";
   const zipFilePath = await createZipFile(rootFolder);
 
