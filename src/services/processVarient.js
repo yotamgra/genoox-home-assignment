@@ -4,7 +4,7 @@ import { countVarientMap } from "./vcfService.js";
 import { cacheAPICalls } from "./fetchVcf.js";
 
 export const processVarient = async ({
-  fileNames,
+  sampleEntries,
   fields,
   start,
   end,
@@ -23,44 +23,52 @@ export const processVarient = async ({
     info[key] = value;
   });
 
-  if (!start || pos >= start) {
-    if (!end || pos <= end) {
-      if (!minDP || info.DP >= minDP) {
-        // Process sample data
-        const sampleData = [
-          {
-            fieldName: "father",
-            sample: fields[9],
-            fileIndex: 0,
-          },
-          {
-            fieldName: "mother",
-            sample: fields[10],
-            fileIndex: 1,
-          },
-          {
-            fieldName: "proband",
-            sample: fields[11],
-            fileIndex: 2,
-          },
-        ];
-        let gene;
-        for (let sampleInfo of sampleData) {
-          const { fieldName, sample, fileIndex } = sampleInfo;
-          const IsSampleContainDigit = /\d/.test(sample);
-          if (IsSampleContainDigit && countVarientMap.get(fieldName) < limit) {
-            gene =
-              gene ||
-              cacheAPICalls.get(`${chr}:${pos}:${ref}:${alt}`) ||
-              (await fetchVariantDetails({ chr, pos, ref, alt }));
-            const newInfo = `${fields[7]};GENE=${gene}`;
-            fs.appendFileSync(
-              fileNames[fileIndex],
-              `${chr}\t${pos}\t${id}\t${ref}\t${alt}\t${qual}\t${filter}\t${newInfo}\t${formatFields}\t${sample}\n`
-            );
-            countVarientMap.set(fieldName, countVarientMap.get(fieldName) + 1);
-          }
-        }
+  if (
+    (!start || pos >= start) &&
+    (!end || pos <= end) &&
+    (!minDP || info.DP >= minDP)
+  ) {
+    // Process sample data
+    const sampleData = sampleEntries.map((sample) => ({
+      ...sample,
+      sampleValue: fields[sample.sampleIndex],
+    }));
+
+    // [
+    //   {
+    //     fieldName: "father",
+    //     sample: fields[9],
+    //     fileIndex: 0,
+    //   },
+    //   {
+    //     fieldName: "mother",
+    //     sample: fields[10],
+    //     fileIndex: 1,
+    //   },
+    //   {
+    //     fieldName: "proband",
+    //     sample: fields[11],
+    //     fileIndex: 2,
+    //   },
+    // ];
+    let gene;
+    for (let sample of sampleData) {
+      const { sampleName, fileName, sampleValue } = sample;
+      const IsSampleContainDigit = /\d/.test(sampleValue);
+
+      if (IsSampleContainDigit && countVarientMap.get(sampleName) < limit) {
+       
+        gene =
+          gene ||
+          cacheAPICalls.get(`${chr}:${pos}:${ref}:${alt}`) ||
+          (await fetchVariantDetails({ chr, pos, ref, alt }));
+        const newInfo = `${fields[7]};GENE=${gene}`;
+        fs.appendFileSync(
+          fileName,
+          `${chr}\t${pos}\t${id}\t${ref}\t${alt}\t${qual}\t${filter}\t${newInfo}\t${formatFields}\t${sampleValue}\n`
+        );
+        countVarientMap.set(sampleName, countVarientMap.get(sampleName) + 1);
+        console.log(countVarientMap);
       }
     }
   }

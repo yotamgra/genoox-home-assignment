@@ -15,8 +15,13 @@ export const processVcf = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Limit must be less than 10");
   }
+  //time to process the file
+  const startTimer = Date.now();
   await parseVCFFile("src/sevices/output.vcf", start, end, minDP, limit);
-
+  const endTimer = Date.now();
+  const timeTaken = endTimer - startTimer;
+  console.log("Time taken to process the file: ", timeTaken);
+  
   const rootFolder = "src/files";
   const zipFilePath = await createZipFile(rootFolder);
 
