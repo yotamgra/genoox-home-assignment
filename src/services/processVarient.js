@@ -39,16 +39,17 @@ export const processVarient = async ({
     for (let sample of sampleData) {
       const { sampleName, fileName, sampleValue } = sample;
       const IsSampleContainDigit = /\d/.test(sampleValue);
+      const sampleCount = countVarientMap.get(sampleName);
 
-      if (IsSampleContainDigit && countVarientMap.get(sampleName) < limit) {
-        gene = gene || await getGeneFromCacheOrAPI({ chr, pos, ref, alt });
+      if (IsSampleContainDigit && sampleCount < limit) {
+        gene = gene || (await getGeneFromCacheOrAPI({ chr, pos, ref, alt }));
 
         const newInfo = `${infoItems};GENE=${gene}`;
         fs.appendFileSync(
           fileName,
           `${chr}\t${pos}\t${id}\t${ref}\t${alt}\t${qual}\t${filter}\t${newInfo}\t${formatFields}\t${sampleValue}\n`
         );
-        countVarientMap.set(sampleName, countVarientMap.get(sampleName) + 1);
+        countVarientMap.set(sampleName, sampleCount + 1);
       }
     }
   }
