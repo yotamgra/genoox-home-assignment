@@ -56,8 +56,8 @@ export const processVarient = async ({
 };
 
 const fetchVariantDetails = async ({ chr, pos, ref, alt }) => {
-  const VariantDetailsURL =
-    "https://franklin.genoox.com/api/fetch_variant_details";
+  const VariantDetailsURL = process.env.VARIANT_DETAILS_URL;
+    
   const REFERENCE_VERSION = "hg19";
   const response = await axios({
     method: "post",
